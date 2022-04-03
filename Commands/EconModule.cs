@@ -100,6 +100,16 @@ public class EconModule : BaseCommandModule
         await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
     }
 
+    [Command("print")]
+    [RequireOwner]
+    public async Task PrintCommand(CommandContext ctx, DiscordMember recipient, int amount)
+    {
+        //Print new currency and give to recipient
+        Econ.IncrementBalance(recipient, ctx.Guild, amount);
+        await ctx.RespondAsync(
+            $"{amount} coins have been printed to {recipient.DisplayName}, leaving them with {Econ.GetBalance(recipient, ctx.Guild)}.");
+    }
+
     [Command("turgle")]
     public async Task TurgleCommand(CommandContext ctx, int amount = 100000)
     {
