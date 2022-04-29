@@ -1,10 +1,4 @@
-﻿using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.Extensions;
-using HitbotSqlite.Services;
-
-namespace HitbotSqlite.Commands;
+﻿namespace HitbotSqlite.Commands;
 
 [RequireGuild]
 public class EconModule : BaseCommandModule
@@ -21,7 +15,7 @@ public class EconModule : BaseCommandModule
     {
         if (ctx.Member is null) throw new ArgumentNullException(nameof(ctx.Member), "Caller was somehow null.");
 
-        switch (Econ.RegisterMember(ctx.Member, ctx.Guild))
+        switch (Econ.RegisterMember(ctx.Member))
         {
             case -1:
                 await ctx.RespondAsync("You are already registered.");
@@ -37,7 +31,7 @@ public class EconModule : BaseCommandModule
     {
         if (ctx.Member is null) throw new ArgumentNullException(nameof(ctx.Member), "Caller was somehow null.");
 
-        int? result = Econ.GetBalance(ctx.Member, ctx.Guild);
+        int? result = Econ.GetBalance(ctx.Member);
         if (result is null)
             await ctx.RespondAsync("You are not registered in this server.");
         else
@@ -47,7 +41,7 @@ public class EconModule : BaseCommandModule
     [Command("balance")]
     public async Task BalanceCommand(CommandContext ctx, DiscordMember membertocheck)
     {
-        int? result = Econ.GetBalance(membertocheck, ctx.Guild);
+        int? result = Econ.GetBalance(membertocheck);
         if (result is null)
             await ctx.RespondAsync("This user is not registered in this server.");
         else
@@ -62,7 +56,7 @@ public class EconModule : BaseCommandModule
 
         var guild = ctx.Guild;
 
-        int? callerBalance = Econ.GetBalance(caller, guild);
+        int? callerBalance = Econ.GetBalance(caller);
 
         if (callerBalance is null)
         {
@@ -77,14 +71,14 @@ public class EconModule : BaseCommandModule
         }
 
         //Decrement caller's balance
-        Econ.DecrementBalance(caller, ctx.Guild, amount);
+        Econ.DecrementBalance(caller, amount);
         //Increment recipient's balance
-        Econ.IncrementBalance(recipient, ctx.Guild, amount);
+        Econ.IncrementBalance(recipient, amount);
         //Send message with resulting balances of both parties
         await ctx.RespondAsync(
             $"Paid {amount} coins to {recipient.DisplayName}, leaving you with " +
-            $"{Econ.GetBalance(caller, guild)} and them with " +
-            $"{Econ.GetBalance(recipient, guild)}.");
+            $"{Econ.GetBalance(caller)} and them with " +
+            $"{Econ.GetBalance(recipient)}.");
     }
 
     [Command("leaderboard")]
@@ -100,14 +94,31 @@ public class EconModule : BaseCommandModule
         await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
     }
 
+    [Command("claimdaily")]
+    public async Task ClaimDailyCommand(CommandContext ctx)
+    {
+        switch (Econ.UserClaimDaily(ctx.Member))
+        {
+            case -1:
+                await ctx.RespondAsync("You are not registered in this server.");
+                break;
+            case 0:
+                await ctx.RespondAsync("You have already claimed this today.");
+                break;
+            case 1:
+                await ctx.RespondAsync("Enjoy your 10 coins :)");
+                break;
+        }
+    }
+
     [Command("print")]
     [RequireOwner]
     public async Task PrintCommand(CommandContext ctx, DiscordMember recipient, int amount)
     {
         //Print new currency and give to recipient
-        Econ.IncrementBalance(recipient, ctx.Guild, amount);
+        Econ.IncrementBalance(recipient, amount);
         await ctx.RespondAsync(
-            $"{amount} coins have been printed to {recipient.DisplayName}, leaving them with {Econ.GetBalance(recipient, ctx.Guild)}.");
+            $"{amount} coins have been printed to {recipient.DisplayName}, leaving them with {Econ.GetBalance(recipient)}.");
     }
 
     [Command("turgle")]
@@ -116,8 +127,8 @@ public class EconModule : BaseCommandModule
         var caller = ctx.Member;
         if (caller is null) throw new ArgumentNullException(nameof(ctx.Member), "Caller was somehow null.");
 
-        Econ.DecrementBalance(caller, ctx.Guild, amount);
+        Econ.DecrementBalance(caller, amount);
         await ctx.RespondAsync(
-            $"You turgled away {amount} coins, leaving you with {Econ.GetBalance(caller, ctx.Guild)}.");
+            $"You turgled away {amount} coins, leaving you with {Econ.GetBalance(caller)}.");
     }
 }

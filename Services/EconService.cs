@@ -1,13 +1,8 @@
-﻿using DSharpPlus.Entities;
-using HitbotSqlite.DataAccess;
-using HitbotSqlite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace HitbotSqlite.Services;
+﻿namespace HitbotSqlite.Services;
 
 public class EconService
 {
-    private EconContext Db { get; }
+    public EconContext Db { get; }
 
     public EconService(EconContext eco)
     {
@@ -18,11 +13,11 @@ public class EconService
     ///     Attempts to register a new member to the database.
     /// </summary>
     /// <param name="member">Discord Id of the member.</param>
-    /// <param name="guild"></param>
     /// <returns>-1 if member is already registered. 1 on success.</returns>
-    public int RegisterMember(DiscordMember member, DiscordGuild guild)
+    public int RegisterMember(DiscordMember member)
     {
         //write down some shorthand
+        var guild = member.Guild;
         ulong memberId = member.Id;
         ulong guildId = guild.Id;
         string memberkey = IdsToMemberKey(memberId, guildId);
@@ -84,8 +79,9 @@ public class EconService
         return -1;
     }
 
-    public int? GetBalance(DiscordMember member, DiscordGuild guild)
+    public int? GetBalance(DiscordMember member)
     {
+        var guild = member.Guild;
         ulong memberId = member.Id;
         ulong guildId = guild.Id;
         var memberToGet = Db.Members.Find(IdsToMemberKey(memberId, guildId));
@@ -96,10 +92,10 @@ public class EconService
     ///     Increments the balance of a member by the specified amount. Will always be by a positive amount.
     /// </summary>
     /// <param name="member">Discord ID of the member whose balance is to be incremented.</param>
-    /// <param name="guild">Discord ID of the guild the member is in.</param>
     /// <param name="by">Amount to increment the balance by, defaulting to 1.</param>
-    public void IncrementBalance(DiscordMember member, DiscordGuild guild, int by = 1)
+    public void IncrementBalance(DiscordMember member, int @by = 1)
     {
+        var guild = member.Guild;
         ulong memberId = member.Id;
         ulong guildId = guild.Id;
 
@@ -108,7 +104,7 @@ public class EconService
         var memberToInc = Db.Members.Find(memberkey);
         if (memberToInc is null)
         {
-            RegisterMember(member, guild);
+            RegisterMember(member);
             memberToInc = Db.Members.Find(memberkey);
         }
 
@@ -125,10 +121,10 @@ public class EconService
     ///     never put a balance below zero.
     /// </summary>
     /// <param name="member">Discord ID of the member whose balance is to be incremented.</param>
-    /// <param name="guild">Discord ID of the guild the member is in.</param>
     /// <param name="by">Amount to decrement the balance by, defaulting to 1.</param>
-    public void DecrementBalance(DiscordMember member, DiscordGuild guild, int by = 1)
+    public void DecrementBalance(DiscordMember member, int @by = 1)
     {
+        var guild = member.Guild;
         ulong memberId = member.Id;
         ulong guildId = guild.Id;
         by = Math.Abs(by);
@@ -136,7 +132,7 @@ public class EconService
         var memberToDec = Db.Members.Find(memberkey);
         if (memberToDec is null)
         {
-            RegisterMember(member, guild);
+            RegisterMember(member);
             memberToDec = Db.Members.Find(memberkey);
         }
 
@@ -147,6 +143,93 @@ public class EconService
             if (memberToDec.EconBalance < 0) memberToDec.EconBalance = 0;
             Db.SaveChanges();
         }
+    }
+
+    public int UserClaimDaily(DiscordMember member)
+    {
+        //Increment the balance of the member by 10 if it is not already claimed today
+        var guild = member.Guild;
+        var memberClaiming = Db.Members.Find(IdsToMemberKey(member.Id, guild.Id));
+        if (memberClaiming is null)
+        {
+            return -1;
+        }
+
+        var lastClaimed = memberClaiming.LastClaimedDaily;
+        if(lastClaimed.Day != DateTime.Now.Day)
+        {
+            IncrementBalance(member, 10);
+            memberClaiming.LastClaimedDaily = DateTime.Now;
+            Db.SaveChanges();
+            return 1;
+        }
+        return 0;
+    }
+    public bool EnterUserInLotto(DiscordMember member)
+    {
+        var guild = member.Guild;
+        var memberClaiming = Db.Members.Find(IdsToMemberKey(member.Id, guild.Id));
+        if (memberClaiming is null || memberClaiming.EconBalance < 10 || memberClaiming.IsInLotto)
+        {
+            return false;
+        }
+        DecrementBalance(member,10);
+        Db.Guilds.Find(guild.Id)!.LottoPot += 10;
+        memberClaiming.IsInLotto = true;
+        return true;
+    }
+    
+    public int GetLottoPot(DiscordGuild guild)
+    {
+        var guildToGet = Db.Guilds.Find(guild.Id);
+        if (guildToGet is null)
+        {
+            return -1;
+        }
+        return guildToGet.LottoPot;
+    }
+
+    public void ResetLotto(DiscordGuild guild)
+    {
+        var guildToReset = Db.Guilds.Find(guild.Id);
+        if (guildToReset is null)
+        {
+            return;
+        }
+        
+        guildToReset.LottoPot = 0;
+        foreach (var member in guildToReset.Members)  
+        {
+            member.IsInLotto = false;
+        }
+
+        Db.SaveChanges();
+    }
+
+    public Member? DrawLotto(DiscordGuild guild)
+    {
+        var rng = new Random();
+        var guildToDraw = Db.Guilds.Find(guild.Id);
+        if (guildToDraw is null || guildToDraw.LottoLastDrawn.Day == DateTime.Now.Day)
+        {
+            return null;
+        }
+        var players = GetUsersInLotto(guild)?.ToArray();
+        if (players is null || players.Length <= 1)
+        {
+            return null;
+        }
+
+        var winner = players[rng.Next(0, players.Length)];
+        winner.EconBalance += guildToDraw.LottoPot;
+        ResetLotto(guild);
+        guildToDraw.LottoLastDrawn = DateTime.Now;
+        return winner;
+    }
+    public IEnumerable<Member>? GetUsersInLotto(DiscordGuild guild)
+    {
+        var lottoGuild = Db.Guilds.Find(guild.Id);
+        return lottoGuild?.Members.Where(x => x.IsInLotto);
     }
 
     public IEnumerable<Member> GetLeaderboard(DiscordGuild guild)
