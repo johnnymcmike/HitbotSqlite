@@ -1,4 +1,6 @@
-﻿namespace HitbotSqlite.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HitbotSqlite.Models;
 
 public class Member
 {

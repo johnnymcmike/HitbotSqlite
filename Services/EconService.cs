@@ -1,4 +1,9 @@
-﻿namespace HitbotSqlite.Services;
+﻿using DSharpPlus.Entities;
+using HitbotSqlite.DataAccess;
+using HitbotSqlite.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace HitbotSqlite.Services;
 
 public class EconService
 {

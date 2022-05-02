@@ -1,4 +1,9 @@
-﻿namespace HitbotSqlite.Commands;
+﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Interactivity.Extensions;
+using HitbotSqlite.Services;
+
+namespace HitbotSqlite.Commands;
 
 [Group("lotto")]
 public class LottoModule : BaseCommandModule
