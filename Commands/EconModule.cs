@@ -1,4 +1,10 @@
-﻿namespace HitbotSqlite.Commands;
+﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using DSharpPlus.Interactivity.Extensions;
+using HitbotSqlite.Services;
+
+namespace HitbotSqlite.Commands;
 
 [RequireGuild]
 public class EconModule : BaseCommandModule

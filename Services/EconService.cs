@@ -1,4 +1,9 @@
-﻿namespace HitbotSqlite.Services;
+﻿using DSharpPlus.Entities;
+using HitbotSqlite.DataAccess;
+using HitbotSqlite.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace HitbotSqlite.Services;
 
 public class EconService
 {
@@ -156,15 +161,17 @@ public class EconService
         }
 
         var lastClaimed = memberClaiming.LastClaimedDaily;
-        if(lastClaimed.Day != DateTime.Now.Day)
+        if (lastClaimed.Day != DateTime.Now.Day)
         {
             IncrementBalance(member, 10);
             memberClaiming.LastClaimedDaily = DateTime.Now;
             Db.SaveChanges();
             return 1;
         }
+
         return 0;
     }
+
     public bool EnterUserInLotto(DiscordMember member)
     {
         var guild = member.Guild;
@@ -173,12 +180,13 @@ public class EconService
         {
             return false;
         }
-        DecrementBalance(member,10);
+
+        DecrementBalance(member, 10);
         Db.Guilds.Find(guild.Id)!.LottoPot += 10;
         memberClaiming.IsInLotto = true;
         return true;
     }
-    
+
     public int GetLottoPot(DiscordGuild guild)
     {
         var guildToGet = Db.Guilds.Find(guild.Id);
@@ -186,6 +194,7 @@ public class EconService
         {
             return -1;
         }
+
         return guildToGet.LottoPot;
     }
 
@@ -196,9 +205,9 @@ public class EconService
         {
             return;
         }
-        
+
         guildToReset.LottoPot = 0;
-        foreach (var member in guildToReset.Members)  
+        foreach (var member in guildToReset.Members)
         {
             member.IsInLotto = false;
         }
@@ -214,6 +223,7 @@ public class EconService
         {
             return null;
         }
+
         var players = GetUsersInLotto(guild)?.ToArray();
         if (players is null || players.Length <= 1)
         {
@@ -226,6 +236,7 @@ public class EconService
         guildToDraw.LottoLastDrawn = DateTime.Now;
         return winner;
     }
+
     public IEnumerable<Member>? GetUsersInLotto(DiscordGuild guild)
     {
         var lottoGuild = Db.Guilds.Find(guild.Id);
