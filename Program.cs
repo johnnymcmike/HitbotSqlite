@@ -47,7 +47,7 @@ internal class Program
 
         var commands = discord.UseCommandsNext(new CommandsNextConfiguration
         {
-            StringPrefixes = new[] {";"},
+            StringPrefixes = new[] {"$"},
             Services = services
         });
         discord.GetCommandsNext().CommandErrored += async (s, e) =>
