@@ -59,6 +59,6 @@ public class LottoModule : BaseCommandModule
         }
 
         var dMember = await ctx.Guild.GetMemberAsync(result.DiscordMemberId);
-        await ctx.RespondAsync($"{dMember.Mention} won, leaving them with {result.EconBalance} coins!");
+        await ctx.RespondAsync($"{dMember.Mention} won, leaving them with {result.EconBalance} kromer!");
     }
 }

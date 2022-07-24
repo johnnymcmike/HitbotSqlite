@@ -136,7 +136,7 @@ public class GamblingModule : BaseCommandModule
                 {
                     thisBet = Econ.GetBalance(currentPlayer) ?? 0;
                     await ctx.Channel.SendMessageAsync(
-                        $"You tried to bet more than you have, so you'll be betting {thisBet} coins, which is all you have. :)");
+                        $"You tried to bet more than you have, so you'll be betting {thisBet} kromer, which is all you have. :)");
                 }
 
                 bets.Add(currentPlayer, thisBet);
@@ -343,7 +343,7 @@ public class GamblingModule : BaseCommandModule
                 (int) (2 * pot * ((float) bets[currentWinner] / pot));
             Econ.IncrementBalance(currentWinner, payout);
             await ctx.Channel.SendMessageAsync(
-                $"{currentWinner.Mention} won, net-gaining {payout - bets[currentWinner]} coins!");
+                $"{currentWinner.Mention} won, net-gaining {payout - bets[currentWinner]} kromer!");
         }
     }
 }

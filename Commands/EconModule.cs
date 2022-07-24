@@ -41,7 +41,7 @@ public class EconModule : BaseCommandModule
         if (result is null)
             await ctx.RespondAsync("You are not registered in this server.");
         else
-            await ctx.RespondAsync($"You have {result} coins.");
+            await ctx.RespondAsync($"You have {result} kromer.");
     }
 
     [Command("balance")]
@@ -51,7 +51,7 @@ public class EconModule : BaseCommandModule
         if (result is null)
             await ctx.RespondAsync("This user is not registered in this server.");
         else
-            await ctx.RespondAsync($"{membertocheck.DisplayName} has {result} coins.");
+            await ctx.RespondAsync($"{membertocheck.DisplayName} has {result} kromer.");
     }
 
     [Command("pay")]
@@ -72,7 +72,7 @@ public class EconModule : BaseCommandModule
 
         if (callerBalance < amount)
         {
-            await ctx.RespondAsync("You don't have enough coins.");
+            await ctx.RespondAsync("You don't have enough kromer.");
             return;
         }
 
@@ -82,7 +82,7 @@ public class EconModule : BaseCommandModule
         Econ.IncrementBalance(recipient, amount);
         //Send message with resulting balances of both parties
         await ctx.RespondAsync(
-            $"Paid {amount} coins to {recipient.DisplayName}, leaving you with " +
+            $"Paid {amount} kromer to {recipient.DisplayName}, leaving you with " +
             $"{Econ.GetBalance(caller)} and them with " +
             $"{Econ.GetBalance(recipient)}.");
     }
@@ -94,7 +94,7 @@ public class EconModule : BaseCommandModule
         var interactivity = ctx.Client.GetInteractivity();
         string result = "";
         int i = 1;
-        foreach (var member in board) result += $"{i}. {member.Tag} with {member.EconBalance} coins\n";
+        foreach (var member in board) result += $"{i}. {member.Tag} with {member.EconBalance} kromer\n";
 
         var pages = interactivity.GeneratePagesInEmbed(result);
         await ctx.Channel.SendPaginatedMessageAsync(ctx.Member, pages);
@@ -112,7 +112,7 @@ public class EconModule : BaseCommandModule
                 await ctx.RespondAsync("You have already claimed this today.");
                 break;
             case 1:
-                await ctx.RespondAsync("Enjoy your 10 coins :)");
+                await ctx.RespondAsync("Enjoy your 10 kromer :)");
                 break;
         }
     }
@@ -124,7 +124,7 @@ public class EconModule : BaseCommandModule
         //Print new currency and give to recipient
         Econ.IncrementBalance(recipient, amount);
         await ctx.RespondAsync(
-            $"{amount} coins have been printed to {recipient.DisplayName}, leaving them with {Econ.GetBalance(recipient)}.");
+            $"{amount} kromer have been printed to {recipient.DisplayName}, leaving them with {Econ.GetBalance(recipient)}.");
     }
 
     [Command("turgle")]
@@ -135,6 +135,6 @@ public class EconModule : BaseCommandModule
 
         Econ.DecrementBalance(caller, amount);
         await ctx.RespondAsync(
-            $"You turgled away {amount} coins, leaving you with {Econ.GetBalance(caller)}.");
+            $"You turgled away {amount} kromer, leaving you with {Econ.GetBalance(caller)}.");
     }
 }
