@@ -31,13 +31,12 @@ public class GamblingModule : BaseCommandModule
         }
 
         //Econ.DecrementBalance(caller, bet);
-        string emojiselection = "🤨🐟7️⃣🐖🍒🤓👽🌈";
+        char[] emojiselection = "🤨🐟7️⃣🐖🍒🤓👽🌈".ToCharArray();
         string result = "";
         for (int i = 0; i < 3; i++)
         {
-            char choice = emojiselection[Rng.Next() % emojiselection.Length];
-            Console.WriteLine(choice.ToString());
-            string? b = DiscordEmoji.FromUnicode("🐟").ToString();
+            string choice = emojiselection[Rng.Next() % emojiselection.Length].ToString();
+            string? b = DiscordEmoji.FromUnicode(choice).ToString();
             result += b;
         }
 
