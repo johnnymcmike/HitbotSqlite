@@ -19,8 +19,21 @@ public class GamblingModule : BaseCommandModule
     private Random Rng { get; }
 
     [Command("slots")]
-    public async Task SlotMachine(CommandContext ctx, int bet = 1)
+    public async Task SlotMachine(CommandContext ctx, int bet = 5)
     {
+        var b = DiscordEmoji.FromGuildEmote(ctx.Client, 983537354474143816);
+        await ctx.Channel.SendMessageAsync(b);
+        return;
+        bet = Math.Abs(bet); //no negatives
+        var interactivity = ctx.Client.GetInteractivity();
+        var caller = ctx.Member;
+        if (Econ.GetBalance(caller) < bet) //check for funds
+        {
+            await ctx.Channel.SendMessageAsync("Insufficient funds.");
+            return;
+        }
+
+        Econ.DecrementBalance(caller, bet);
     }
 
     [Command("duel")]
