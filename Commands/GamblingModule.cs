@@ -36,6 +36,7 @@ public class GamblingModule : BaseCommandModule
         for (int i = 0; i < 3; i++)
         {
             char choice = emojiselection[Rng.Next() % emojiselection.Length];
+            Console.WriteLine(choice.ToString());
             string? b = DiscordEmoji.FromUnicode("🐟").ToString();
             result += b;
         }
