@@ -21,7 +21,7 @@ public class GamblingModule : BaseCommandModule
     [Command("slots")]
     public async Task SlotMachine(CommandContext ctx, int bet = 5)
     {
-        var b = DiscordEmoji.FromGuildEmote(ctx.Client, 983537354474143816);
+        var b = DiscordEmoji.FromGuildEmote(ctx.Client, 988413676476321822);
         await ctx.Channel.SendMessageAsync(b);
         return;
         bet = Math.Abs(bet); //no negatives
