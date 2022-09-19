@@ -248,7 +248,7 @@ public class EconService
         var query = Db.Members
             .AsNoTracking()
             .Where(m => m.GuildId == guild.Id)
-            .OrderBy(m => m.EconBalance);
+            .OrderByDescending(m => m.EconBalance);
 
         return query;
     }
