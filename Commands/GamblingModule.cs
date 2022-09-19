@@ -36,7 +36,8 @@ public class GamblingModule : BaseCommandModule
         for (int i = 0; i < 3; i++)
         {
             char choice = emojiselection[Rng.Next() % emojiselection.Length];
-            result += choice;
+            string? b = DiscordEmoji.FromUnicode(choice.ToString()).ToString();
+            result += b;
         }
 
         await ctx.Channel.SendMessageAsync("testing mode " + result);
