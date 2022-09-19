@@ -21,8 +21,8 @@ public class GamblingModule : BaseCommandModule
     [Command("slots")]
     public async Task SlotMachine(CommandContext ctx, int bet = 5)
     {
-        var b = DiscordEmoji.FromGuildEmote(ctx.Client, 988413676476321822);
-        await ctx.Channel.SendMessageAsync(b);
+        ulong b = DiscordEmoji.FromName(ctx.Client, ":spit:").Id;
+        await ctx.Channel.SendMessageAsync(b.ToString());
         return;
         bet = Math.Abs(bet); //no negatives
         var interactivity = ctx.Client.GetInteractivity();
@@ -34,6 +34,17 @@ public class GamblingModule : BaseCommandModule
         }
 
         Econ.DecrementBalance(caller, bet);
+    }
+
+    private static int emojiLookup(string uni)
+    {
+        switch (uni)
+        {
+            case "🐟":
+                return 2;
+            default:
+                return 0;
+        }
     }
 
     [Command("duel")]
