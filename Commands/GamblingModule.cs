@@ -21,9 +21,6 @@ public class GamblingModule : BaseCommandModule
     [Command("slots")]
     public async Task SlotMachine(CommandContext ctx, int bet = 5)
     {
-        ulong b = DiscordEmoji.FromName(ctx.Client, ":seven:").Id;
-        await ctx.Channel.SendMessageAsync(b.ToString());
-        return;
         bet = Math.Abs(bet); //no negatives
         var interactivity = ctx.Client.GetInteractivity();
         var caller = ctx.Member;
@@ -33,7 +30,16 @@ public class GamblingModule : BaseCommandModule
             return;
         }
 
-        Econ.DecrementBalance(caller, bet);
+        //Econ.DecrementBalance(caller, bet);
+        string emojiselection = "🤨🐟7️⃣🐖🍒🤓👽🌈";
+        string result = "";
+        for (int i = 0; i < 3; i++)
+        {
+            char choice = emojiselection[Rng.Next() % emojiselection.Length];
+            result += choice;
+        }
+
+        await ctx.Channel.SendMessageAsync("testing mode " + result);
     }
 
     private static int emojiLookup(string uni)
